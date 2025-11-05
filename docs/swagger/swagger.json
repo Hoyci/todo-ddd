@@ -1,277 +1,478 @@
 {
-    "swagger": "2.0",
-    "info": {
-        "contact": {}
-    },
-    "paths": {
-        "/api/v1/tasks": {
-            "get": {
-                "description": "List all tasks for a given user ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tasks"
-                ],
-                "summary": "List tasks by user",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/handler.TaskResponse"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Create a new task for a user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tasks"
-                ],
-                "summary": "Create a new task",
-                "parameters": [
-                    {
-                        "description": "Task data",
-                        "name": "task",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handler.CreateTaskRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/handler.TaskResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
+  "swagger": "2.0",
+  "info": {
+    "contact": {},
+    "title": "Tasks and Users API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/v1/tasks": {
+      "post": {
+        "description": "Create a new task for a user",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "tasks"
+        ],
+        "summary": "Create a new task",
+        "parameters": [
+          {
+            "description": "Task data",
+            "name": "task",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/handler.CreateTaskRequest"
             }
-        },
-        "/api/v1/tasks/{id}": {
-            "put": {
-                "description": "Update title, description or priority",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tasks"
-                ],
-                "summary": "Update a task",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Task ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Updated data",
-                        "name": "task",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handler.UpdateTaskRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/handler.TaskResponse"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Soft delete a task by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tasks"
-                ],
-                "summary": "Delete a task",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Task ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    }
-                }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/handler.TaskResponse"
             }
-        },
-        "/api/v1/tasks/{id}/status": {
-            "patch": {
-                "description": "Update the status of a specific task",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tasks"
-                ],
-                "summary": "Update task status",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Task ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Status data",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handler.UpdateTaskStatusRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/handler.TaskResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
             }
+          }
         }
+      }
     },
-    "definitions": {
-        "handler.CreateTaskRequest": {
-            "type": "object",
-            "required": [
-                "priority",
-                "title"
-            ],
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "priority": {
-                    "type": "integer",
-                    "maximum": 3,
-                    "minimum": 1
-                },
-                "title": {
-                    "type": "string",
-                    "minLength": 3
-                }
+    "/api/v1/tasks/{id}": {
+      "put": {
+        "description": "Update title, description or priority",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "tasks"
+        ],
+        "summary": "Update a task",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Task ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Updated data",
+            "name": "task",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/handler.UpdateTaskRequest"
             }
-        },
-        "handler.TaskResponse": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "priority": {
-                    "type": "integer"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/handler.TaskResponse"
             }
-        },
-        "handler.UpdateTaskRequest": {
-            "type": "object",
-            "required": [
-                "title"
-            ],
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "priority": {
-                    "type": "integer",
-                    "maximum": 3,
-                    "minimum": 1
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "handler.UpdateTaskStatusRequest": {
-            "type": "object",
-            "required": [
-                "status"
-            ],
-            "properties": {
-                "status": {
-                    "type": "string",
-                    "enum": [
-                        "new",
-                        "in_progress",
-                        "completed"
-                    ]
-                }
-            }
+          }
         }
+      },
+      "delete": {
+        "description": "Soft delete a task by ID",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "tasks"
+        ],
+        "summary": "Delete a task",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Task ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/tasks/{id}/status": {
+      "patch": {
+        "description": "Update the status of a specific task",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "tasks"
+        ],
+        "summary": "Update task status",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Task ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Status data",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/handler.UpdateTaskStatusRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/handler.TaskResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tasks/{user_id}": {
+      "get": {
+        "description": "List all tasks for a given user ID",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "tasks"
+        ],
+        "summary": "List tasks by user",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/handler.TaskResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users": {
+      "post": {
+        "description": "Create a new user",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "users"
+        ],
+        "summary": "Create a new user",
+        "parameters": [
+          {
+            "description": "User data",
+            "name": "user",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/handler.CreateUserRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/handler.UserResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}": {
+      "get": {
+        "description": "Get a single user by ID",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "users"
+        ],
+        "summary": "Get user by ID",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "User ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/handler.UserResponse"
+            }
+          }
+        }
+      },
+      "put": {
+        "description": "Update name or email of a user",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "users"
+        ],
+        "summary": "Update a user",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "User ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Updated data",
+            "name": "user",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/handler.UpdateUserRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/handler.UserResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "Soft delete a user by ID",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "users"
+        ],
+        "summary": "Delete a user",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "User ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
     }
+  },
+  "definitions": {
+    "handler.CreateTaskRequest": {
+      "type": "object",
+      "required": [
+        "priority",
+        "title",
+        "user_id"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "priority": {
+          "type": "integer",
+          "maximum": 3,
+          "minimum": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 3
+        },
+        "user_id": {
+          "type": "string"
+        }
+      }
+    },
+    "handler.CreateUserRequest": {
+      "type": "object",
+      "required": [
+        "email",
+        "name"
+      ],
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 3
+        }
+      }
+    },
+    "handler.TaskResponse": {
+      "type": "object",
+      "properties": {
+        "created_at": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "priority": {
+          "type": "integer"
+        },
+        "status": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "updated_at": {
+          "type": "string"
+        }
+      }
+    },
+    "handler.UpdateTaskRequest": {
+      "type": "object",
+      "required": [
+        "title"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "priority": {
+          "type": "integer",
+          "maximum": 3,
+          "minimum": 1
+        },
+        "title": {
+          "type": "string"
+        }
+      }
+    },
+    "handler.UpdateTaskStatusRequest": {
+      "type": "object",
+      "required": [
+        "status"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "new",
+            "in_progress",
+            "completed"
+          ]
+        }
+      }
+    },
+    "handler.UpdateUserRequest": {
+      "type": "object",
+      "required": [
+        "email",
+        "name"
+      ],
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 3
+        }
+      }
+    },
+    "handler.UserResponse": {
+      "type": "object",
+      "properties": {
+        "created_at": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "updated_at": {
+          "type": "string"
+        }
+      }
+    }
+  }
 }

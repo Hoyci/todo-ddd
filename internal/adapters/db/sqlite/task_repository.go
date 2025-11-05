@@ -2,10 +2,9 @@ package sqlite
 
 import (
 	"database/sql"
-	"fmt"
 	"time"
 
-	"github.com/hoyci/todo-ddd/pkg/domain"
+	domain "github.com/hoyci/todo-ddd/pkg/domain/task"
 	_ "modernc.org/sqlite"
 )
 
@@ -38,8 +37,8 @@ func (r *SQLiteTaskRepository) Update(task *domain.Task) error {
 	return err
 }
 
-func (r *SQLiteTaskRepository) FindByID(id string) (*domain.Task, error) {
-	row := r.db.QueryRow(`SELECT id, title, description, priority, status, created_at, updated_at, deleted_at FROM tasks WHERE id = ?`, id)
+func (r *SQLiteTaskRepository) FindByID(id, userID string) (*domain.Task, error) {
+	row := r.db.QueryRow(`SELECT id, title, description, priority, status, created_at, updated_at, deleted_at FROM tasks t WHERE t.id = ? AND t.user_id = ?`, id, userID)
 	task := &domain.Task{}
 	err := row.Scan(&task.ID, &task.Title, &task.Description, &task.Priority, &task.Status, &task.CreatedAt, &task.UpdatedAt, &task.DeletedAt)
 	if err != nil {
@@ -48,8 +47,8 @@ func (r *SQLiteTaskRepository) FindByID(id string) (*domain.Task, error) {
 	return task, nil
 }
 
-func (r *SQLiteTaskRepository) List() ([]*domain.Task, error) {
-	rows, err := r.db.Query(`SELECT id, title, description, priority, status, created_at, updated_at FROM tasks t WHERE t.deleted_at is null`)
+func (r *SQLiteTaskRepository) List(userID string) ([]*domain.Task, error) {
+	rows, err := r.db.Query(`SELECT id, title, description, priority, status, created_at, updated_at FROM tasks t WHERE t.user_id = ? AND t.deleted_at is null`, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -74,26 +73,4 @@ func (r *SQLiteTaskRepository) Delete(id string, timestamp time.Time) error {
 	`
 	_, err := r.db.Exec(query, timestamp, id)
 	return err
-}
-
-func InitDB() (*sql.DB, error) {
-	db, err := sql.Open("sqlite", "./data/tasks.db")
-	if err != nil {
-		return nil, err
-	}
-	schema := `
-	CREATE TABLE IF NOT EXISTS tasks (
-		id TEXT PRIMARY KEY,
-		title TEXT NOT NULL,
-		description TEXT,
-		priority INTEGER,
-		status TEXT NOT NULL,
-		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-		updated_at TIMESTAMP,
-		deleted_at TIMESTAMP
-	);`
-	if _, err := db.Exec(schema); err != nil {
-		return nil, fmt.Errorf("create schema: %w", err)
-	}
-	return db, nil
 }

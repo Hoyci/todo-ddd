@@ -94,7 +94,8 @@ func (h *TaskHandler) Update(c *gin.Context) {
 	}
 
 	task, err := h.UpdateUC.Execute(usecase.UpdateTaskInput{
-		ID:          id,
+		TaskID:      id,
+		UserID:      "123",
 		Title:       req.Title,
 		Description: req.Description,
 		Priority:    valueobject.Priority(req.Priority),
@@ -138,8 +139,12 @@ func (h *TaskHandler) UpdateStatus(c *gin.Context) {
 		return
 	}
 
-	status := valueobject.Status(req.Status)
-	task, err := h.UpdateStatusUC.Execute(id, status)
+	input := usecase.UpdateTaskStatusInput{
+		TaskID: id,
+		Status: valueobject.Status(req.Status),
+		UserID: "123",
+	}
+	task, err := h.UpdateStatusUC.Execute(input)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -166,9 +171,10 @@ func (h *TaskHandler) UpdateStatus(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Success 200 {array} TaskResponse
-// @Router /api/v1/tasks [get]
+// @Router /api/v1/tasks/{user_id} [get]
 func (h *TaskHandler) List(c *gin.Context) {
-	tasks, err := h.ListUC.Execute()
+	userID := c.Param("user_id")
+	tasks, err := h.ListUC.Execute(userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -205,7 +211,7 @@ func (h *TaskHandler) List(c *gin.Context) {
 func (h *TaskHandler) Delete(c *gin.Context) {
 	id := c.Param("id")
 
-	_, err := h.DeleteUC.Execute(usecase.DeleteTaskInput{ID: id})
+	_, err := h.DeleteUC.Execute(usecase.DeleteTaskInput{TaskID: id})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -222,6 +228,7 @@ type CreateTaskRequest struct {
 	Title       string `json:"title" validate:"required,min=3"`
 	Description string `json:"description"`
 	Priority    int    `json:"priority" validate:"required,min=1,max=3"`
+	UserID      string `json:"user_id" validate:"required,uuid"`
 }
 
 type TaskResponse struct {

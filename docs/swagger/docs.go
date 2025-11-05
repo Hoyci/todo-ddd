@@ -16,30 +16,6 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/api/v1/tasks": {
-            "get": {
-                "description": "List all tasks for a given user ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tasks"
-                ],
-                "summary": "List tasks by user",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/handler.TaskResponse"
-                            }
-                        }
-                    }
-                }
-            },
             "post": {
                 "description": "Create a new task for a user",
                 "consumes": [
@@ -199,6 +175,173 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/v1/tasks/{user_id}": {
+            "get": {
+                "description": "List all tasks for a given user ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "List tasks by user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/handler.TaskResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users": {
+            "post": {
+                "description": "Create a new user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Create a new user",
+                "parameters": [
+                    {
+                        "description": "User data",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.CreateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/handler.UserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users/{id}": {
+            "get": {
+                "description": "Get a single user by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get user by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.UserResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update name or email of a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Update a user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated data",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.UpdateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.UserResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Soft delete a user by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Delete a user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -206,7 +349,8 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "priority",
-                "title"
+                "title",
+                "user_id"
             ],
             "properties": {
                 "description": {
@@ -218,6 +362,25 @@ const docTemplate = `{
                     "minimum": 1
                 },
                 "title": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.CreateUserRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "name"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string",
                     "minLength": 3
                 }
@@ -281,6 +444,42 @@ const docTemplate = `{
                         "in_progress",
                         "completed"
                     ]
+                }
+            }
+        },
+        "handler.UpdateUserRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "name"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 3
+                }
+            }
+        },
+        "handler.UserResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
                 }
             }
         }

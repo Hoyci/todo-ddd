@@ -7,7 +7,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func SetupRouter(taskHandler *handler.TaskHandler) *gin.Engine {
+func SetupRouter(taskHandler *handler.TaskHandler, userHandler *handler.UserHandler) *gin.Engine {
 	r := gin.Default()
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swagFiles.Handler))
@@ -15,10 +15,15 @@ func SetupRouter(taskHandler *handler.TaskHandler) *gin.Engine {
 	v1 := r.Group("/api/v1")
 	{
 		v1.POST("/tasks", taskHandler.Create)
+		v1.GET("/tasks/:user_id", taskHandler.List)
 		v1.PUT("/tasks/:id", taskHandler.Update)
 		v1.PATCH("/tasks/:id/status", taskHandler.UpdateStatus)
-		v1.GET("/tasks", taskHandler.List)
 		v1.DELETE("/tasks/:id", taskHandler.Delete)
+
+		v1.POST("/users/", userHandler.Create)
+		v1.GET("/users/:id", userHandler.FindByID)
+		v1.PUT("/users/:id", userHandler.Update)
+		v1.DELETE("/users/:id", userHandler.Delete)
 	}
 
 	return r

@@ -3,11 +3,12 @@ package usecase
 import (
 	"log/slog"
 
-	"github.com/hoyci/todo-ddd/pkg/domain"
+	domain "github.com/hoyci/todo-ddd/pkg/domain/task"
 )
 
 type DeleteTaskInput struct {
-	ID string
+	TaskID string
+	UserID string
 }
 
 type DeleteTaskOutput struct {
@@ -19,9 +20,9 @@ type DeleteTaskUseCase struct {
 }
 
 func (uc *DeleteTaskUseCase) Execute(input DeleteTaskInput) (*DeleteTaskOutput, error) {
-	task, err := uc.TaskRepo.FindByID(input.ID)
+	task, err := uc.TaskRepo.FindByID(input.TaskID, input.UserID)
 	if err != nil {
-		slog.Error("error trying to find task by id", "taskID", input.ID)
+		slog.Error("error trying to find task by id", "taskID", input.TaskID)
 		return nil, err
 	}
 

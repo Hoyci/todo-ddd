@@ -3,15 +3,16 @@ package usecase
 import (
 	"log/slog"
 
-	"github.com/hoyci/todo-ddd/pkg/domain"
+	domain "github.com/hoyci/todo-ddd/pkg/domain/task"
 	"github.com/hoyci/todo-ddd/pkg/domain/valueobject"
 )
 
 type UpdateTaskInput struct {
-	ID          string
+	TaskID      string
 	Title       string
 	Description string
 	Priority    valueobject.Priority
+	UserID      string
 }
 
 type UpdateTaskOutput struct {
@@ -23,9 +24,9 @@ type UpdateTaskUseCase struct {
 }
 
 func (uc *UpdateTaskUseCase) Execute(input UpdateTaskInput) (*UpdateTaskOutput, error) {
-	task, err := uc.TaskRepo.FindByID(input.ID)
+	task, err := uc.TaskRepo.FindByID(input.TaskID, input.UserID)
 	if err != nil {
-		slog.Error("error trying to find task by id", "taskID", input.ID)
+		slog.Error("error trying to find task by id", "taskID", input.TaskID)
 		return nil, err
 	}
 

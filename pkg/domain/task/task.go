@@ -13,18 +13,20 @@ type Task struct {
 	Description string
 	Priority    valueobject.Priority
 	Status      valueobject.Status
+	UserID      string
 	CreatedAt   time.Time
 	UpdatedAt   *time.Time
 	DeletedAt   *time.Time
 }
 
-func NewTask(title, description string, priority valueobject.Priority) *Task {
+func NewTask(title, description, userID string, priority valueobject.Priority) *Task {
 	return &Task{
 		ID:          uuid.New().String(),
 		Title:       title,
 		Description: description,
 		Priority:    priority,
 		Status:      valueobject.StatusNew,
+		UserID:      userID,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   nil,
 		DeletedAt:   nil,

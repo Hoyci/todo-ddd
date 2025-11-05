@@ -8,7 +8,8 @@ import (
 	"github.com/hoyci/todo-ddd/internal/adapters/api"
 	"github.com/hoyci/todo-ddd/internal/adapters/api/handler"
 	"github.com/hoyci/todo-ddd/internal/adapters/db/sqlite"
-	usecase "github.com/hoyci/todo-ddd/pkg/usecase/task"
+	usecasetask "github.com/hoyci/todo-ddd/pkg/usecase/task"
+	usecaseuser "github.com/hoyci/todo-ddd/pkg/usecase/user"
 )
 
 func main() {
@@ -17,13 +18,19 @@ func main() {
 		log.Fatal(err)
 	}
 
-	repo := sqlite.NewSQLiteTaskRepository(db)
+	taskRepo := sqlite.NewSQLiteTaskRepository(db)
+	userRepo := sqlite.NewSQLiteUserRepository(db)
 
-	listUC := &usecase.ListTaskUseCase{TaskRepo: repo}
-	createUC := &usecase.CreateTaskUseCase{TaskRepo: repo}
-	updateUC := &usecase.UpdateTaskUseCase{TaskRepo: repo}
-	updateStatusUC := &usecase.UpdateTaskStatusUseCase{TaskRepo: repo}
-	deleteUC := &usecase.DeleteTaskUseCase{TaskRepo: repo}
+	listUC := &usecasetask.ListTaskUseCase{TaskRepo: taskRepo}
+	createUC := &usecasetask.CreateTaskUseCase{TaskRepo: taskRepo}
+	updateUC := &usecasetask.UpdateTaskUseCase{TaskRepo: taskRepo}
+	updateStatusUC := &usecasetask.UpdateTaskStatusUseCase{TaskRepo: taskRepo}
+	deleteUC := &usecasetask.DeleteTaskUseCase{TaskRepo: taskRepo}
+
+	createUserUC := &usecaseuser.CreateUserUseCase{UserRepo: userRepo}
+	updateUserUC := &usecaseuser.UpdateUserUseCase{UserRepo: userRepo}
+	deleteUserUC := &usecaseuser.DeleteUserUseCase{UserRepo: userRepo}
+	findUserUC := &usecaseuser.FindUserUseCase{UserRepo: userRepo}
 
 	validate := validator.New()
 
@@ -36,7 +43,15 @@ func main() {
 		Validate:       validate,
 	}
 
-	router := api.SetupRouter(taskHandler)
+	userHandler := &handler.UserHandler{
+		CreateUC: createUserUC,
+		UpdateUC: updateUserUC,
+		DeleteUC: deleteUserUC,
+		FindUC:   findUserUC,
+		Validate: validate,
+	}
+
+	router := api.SetupRouter(taskHandler, userHandler)
 	log.Println("Server running on :8080")
 	router.Run(":8080")
 }

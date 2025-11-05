@@ -3,7 +3,7 @@ package usecase
 import (
 	"log/slog"
 
-	"github.com/hoyci/todo-ddd/pkg/domain"
+	domain "github.com/hoyci/todo-ddd/pkg/domain/task"
 	"github.com/hoyci/todo-ddd/pkg/domain/valueobject"
 )
 
@@ -11,6 +11,7 @@ type CreateTaskInput struct {
 	Title       string
 	Description string
 	Priority    valueobject.Priority
+	UserID      string
 }
 
 type CreateTaskOutput struct {
@@ -22,7 +23,7 @@ type CreateTaskUseCase struct {
 }
 
 func (uc *CreateTaskUseCase) Execute(input CreateTaskInput) (*CreateTaskOutput, error) {
-	task := domain.NewTask(input.Title, input.Description, input.Priority)
+	task := domain.NewTask(input.Title, input.Description, input.UserID, input.Priority)
 	err := uc.TaskRepo.Save(task)
 	if err != nil {
 		slog.Error("error trying to save task")
