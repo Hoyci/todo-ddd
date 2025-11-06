@@ -28,6 +28,27 @@ definitions:
     - email
     - name
     type: object
+  handler.OnboardingErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  handler.OnboardingRequest:
+    properties:
+      email:
+        type: string
+      name:
+        minLength: 3
+        type: string
+    required:
+    - email
+    - name
+    type: object
+  handler.OnboardingResponse:
+    properties:
+      message:
+        type: string
+    type: object
   handler.TaskResponse:
     properties:
       created_at:
@@ -96,6 +117,44 @@ definitions:
 info:
   contact: {}
 paths:
+  /api/v1/onboarding:
+    post:
+      consumes:
+      - application/json
+      description: Initiates or finalizes the onboarding process for a new user.
+      parameters:
+      - description: Onboarding request payload
+        in: body
+        name: onboarding
+        required: true
+        schema:
+          $ref: '#/definitions/handler.OnboardingRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Onboarding completed successfully
+          schema:
+            $ref: '#/definitions/handler.OnboardingResponse'
+        "400":
+          description: Invalid request payload or validation error
+          schema:
+            $ref: '#/definitions/handler.OnboardingErrorResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/handler.OnboardingErrorResponse'
+        "409":
+          description: User with this email already exists
+          schema:
+            $ref: '#/definitions/handler.OnboardingErrorResponse'
+        "500":
+          description: Unexpected internal server error
+          schema:
+            $ref: '#/definitions/handler.OnboardingErrorResponse'
+      summary: Complete user onboarding
+      tags:
+      - Onboarding
   /api/v1/tasks:
     post:
       consumes:

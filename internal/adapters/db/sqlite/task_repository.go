@@ -10,14 +10,26 @@ import (
 
 type SQLiteTaskRepository struct {
 	db *sql.DB
+	tx *sql.Tx
 }
 
 func NewSQLiteTaskRepository(db *sql.DB) *SQLiteTaskRepository {
 	return &SQLiteTaskRepository{db: db}
 }
 
+func NewSQLiteTaskRepositoryWithTx(tx *sql.Tx) *SQLiteTaskRepository {
+	return &SQLiteTaskRepository{tx: tx}
+}
+
+func (r *SQLiteTaskRepository) getExecutor() SQLExecutor {
+	if r.tx != nil {
+		return r.tx
+	}
+	return r.db
+}
+
 func (r *SQLiteTaskRepository) Save(task *domain.Task) error {
-	_, err := r.db.Exec(`
+	_, err := r.getExecutor().Exec(`
 		INSERT INTO tasks (id, title, description, priority, status, created_at, updated_at, deleted_at)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 		task.ID, task.Title, task.Description, task.Priority, task.Status, task.CreatedAt, task.UpdatedAt, task.DeletedAt)
@@ -25,7 +37,7 @@ func (r *SQLiteTaskRepository) Save(task *domain.Task) error {
 }
 
 func (r *SQLiteTaskRepository) Update(task *domain.Task) error {
-	_, err := r.db.Exec(`
+	_, err := r.getExecutor().Exec(`
 		UPDATE tasks 
 		SET title = ?, 
 			description = ?, 
@@ -38,7 +50,7 @@ func (r *SQLiteTaskRepository) Update(task *domain.Task) error {
 }
 
 func (r *SQLiteTaskRepository) FindByID(id, userID string) (*domain.Task, error) {
-	row := r.db.QueryRow(`SELECT id, title, description, priority, status, created_at, updated_at, deleted_at FROM tasks t WHERE t.id = ? AND t.user_id = ?`, id, userID)
+	row := r.getExecutor().QueryRow(`SELECT id, title, description, priority, status, created_at, updated_at, deleted_at FROM tasks t WHERE t.id = ? AND t.user_id = ?`, id, userID)
 	task := &domain.Task{}
 	err := row.Scan(&task.ID, &task.Title, &task.Description, &task.Priority, &task.Status, &task.CreatedAt, &task.UpdatedAt, &task.DeletedAt)
 	if err != nil {
@@ -48,7 +60,7 @@ func (r *SQLiteTaskRepository) FindByID(id, userID string) (*domain.Task, error)
 }
 
 func (r *SQLiteTaskRepository) List(userID string) ([]*domain.Task, error) {
-	rows, err := r.db.Query(`SELECT id, title, description, priority, status, created_at, updated_at FROM tasks t WHERE t.user_id = ? AND t.deleted_at is null`, userID)
+	rows, err := r.getExecutor().Query(`SELECT id, title, description, priority, status, created_at, updated_at FROM tasks t WHERE t.user_id = ? AND t.deleted_at is null`, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -71,6 +83,6 @@ func (r *SQLiteTaskRepository) Delete(id string, timestamp time.Time) error {
 		SET deleted_at = ?
 		WHERE id = ? AND deleted_at IS NULL
 	`
-	_, err := r.db.Exec(query, timestamp, id)
+	_, err := r.getExecutor().Exec(query, timestamp, id)
 	return err
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/hoyci/todo-ddd/internal/adapters/api"
 	"github.com/hoyci/todo-ddd/internal/adapters/api/handler"
 	"github.com/hoyci/todo-ddd/internal/adapters/db/sqlite"
+	usecasesetup "github.com/hoyci/todo-ddd/pkg/usecase/setup"
 	usecasetask "github.com/hoyci/todo-ddd/pkg/usecase/task"
 	usecaseuser "github.com/hoyci/todo-ddd/pkg/usecase/user"
 )
@@ -32,6 +33,8 @@ func main() {
 	deleteUserUC := &usecaseuser.DeleteUserUseCase{UserRepo: userRepo}
 	findUserUC := &usecaseuser.FindUserUseCase{UserRepo: userRepo}
 
+	setupUC := &usecasesetup.SetupOnboardingUseCase{DB: db}
+
 	validate := validator.New()
 
 	taskHandler := &handler.TaskHandler{
@@ -51,7 +54,12 @@ func main() {
 		Validate: validate,
 	}
 
-	router := api.SetupRouter(taskHandler, userHandler)
+	setupHandler := &handler.OnboardingHandler{
+		SetupUC:  setupUC,
+		Validate: validate,
+	}
+
+	router := api.SetupRouter(taskHandler, userHandler, setupHandler)
 	log.Println("Server running on :8080")
 	router.Run(":8080")
 }

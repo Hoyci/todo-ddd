@@ -15,6 +15,64 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/onboarding": {
+            "post": {
+                "description": "Initiates or finalizes the onboarding process for a new user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Onboarding"
+                ],
+                "summary": "Complete user onboarding",
+                "parameters": [
+                    {
+                        "description": "Onboarding request payload",
+                        "name": "onboarding",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.OnboardingRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Onboarding completed successfully",
+                        "schema": {
+                            "$ref": "#/definitions/handler.OnboardingResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request payload or validation error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.OnboardingErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/handler.OnboardingErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "User with this email already exists",
+                        "schema": {
+                            "$ref": "#/definitions/handler.OnboardingErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Unexpected internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.OnboardingErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/tasks": {
             "post": {
                 "description": "Create a new task for a user",
@@ -383,6 +441,38 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "minLength": 3
+                }
+            }
+        },
+        "handler.OnboardingErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.OnboardingRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "name"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 3
+                }
+            }
+        },
+        "handler.OnboardingResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
                 }
             }
         },

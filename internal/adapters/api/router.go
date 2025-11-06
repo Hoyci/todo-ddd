@@ -7,7 +7,11 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func SetupRouter(taskHandler *handler.TaskHandler, userHandler *handler.UserHandler) *gin.Engine {
+func SetupRouter(
+	taskHandler *handler.TaskHandler,
+	userHandler *handler.UserHandler,
+	onboardingHandler *handler.OnboardingHandler,
+) *gin.Engine {
 	r := gin.Default()
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swagFiles.Handler))
@@ -24,6 +28,8 @@ func SetupRouter(taskHandler *handler.TaskHandler, userHandler *handler.UserHand
 		v1.GET("/users/:id", userHandler.FindByID)
 		v1.PUT("/users/:id", userHandler.Update)
 		v1.DELETE("/users/:id", userHandler.Delete)
+
+		v1.POST("/onboarding", onboardingHandler.Setup)
 	}
 
 	return r
