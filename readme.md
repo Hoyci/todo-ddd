@@ -38,12 +38,12 @@ Os pacotes `internal/adapters` contêm as implementações concretas que se "ada
   - Converte JSON (`CreateTaskRequest`) para a entrada do Usecase (`CreateTaskInput`).
   - Converte a saída do Usecase para a resposta HTTP (`TaskResponse`).
 
-🧩 4. Casos de Uso Agregadores e Transações (Onboarding)
+## 🧩 4. Casos de Uso Agregadores e Transações (Onboarding)
 
 O caso de uso SetupOnboardingUseCase (pkg/usecase/setup/setup.go) é um Application Service agregador.
 Enquanto os casos de uso de User e Task lidam com operações individuais, o Onboarding coordena ambos em uma única operação transacional.
 
-🧠 Conceito de Agregador
+### 🧠 4.1 Conceito de Agregador
 
 Em DDD, um Agregador de Casos de Uso é um serviço que:
 - combina várias operações de aplicação/domínio,
