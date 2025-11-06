@@ -38,7 +38,24 @@ Os pacotes `internal/adapters` contêm as implementações concretas que se "ada
   - Converte JSON (`CreateTaskRequest`) para a entrada do Usecase (`CreateTaskInput`).
   - Converte a saída do Usecase para a resposta HTTP (`TaskResponse`).
 
-## 4. O Ponto de Arranque (Glue Code)
+🧩 4. Casos de Uso Agregadores e Transações (Onboarding)
+
+O caso de uso SetupOnboardingUseCase (pkg/usecase/setup/setup.go) é um Application Service agregador.
+Enquanto os casos de uso de User e Task lidam com operações individuais, o Onboarding coordena ambos em uma única operação transacional.
+
+🧠 Conceito de Agregador
+
+Em DDD, um Agregador de Casos de Uso é um serviço que:
+- combina várias operações de aplicação/domínio,
+- garante consistência entre agregados (ex: User e Task),
+- e aplica regras de orquestração e atomicidade.
+
+Neste projeto, o SetupOnboardingUseCase:
+1. Cria um novo usuário (UserAggregate);
+2. Cria uma tarefa de boas-vindas (TaskAggregate);
+3. Faz commit apenas se ambas as operações forem bem-sucedidas.
+
+## 5. O Ponto de Arranque (Glue Code)
 
 O `cmd/main.go` é o único local que "cola" todas as peças, realizando a Injeção de Dependência final (Service Locator/Container).
 
