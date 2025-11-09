@@ -17,7 +17,7 @@ func NewSQLiteTaskRepository(db *sql.DB) *SQLiteTaskRepository {
 	return &SQLiteTaskRepository{db: db}
 }
 
-func NewSQLiteTaskRepositoryWithTx(tx *sql.Tx) *SQLiteTaskRepository {
+func (r *SQLiteTaskRepository) WithTx(tx *sql.Tx) *SQLiteTaskRepository {
 	return &SQLiteTaskRepository{tx: tx}
 }
 

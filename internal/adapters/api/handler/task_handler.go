@@ -1,21 +1,23 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/hoyci/todo-ddd/pkg/domain/valueobject"
-	usecase "github.com/hoyci/todo-ddd/pkg/usecase/task"
+	usecase "github.com/hoyci/todo-ddd/pkg/usecase"
+	usecasetask "github.com/hoyci/todo-ddd/pkg/usecase/task"
 )
 
 type TaskHandler struct {
-	CreateUC       *usecase.CreateTaskUseCase
-	UpdateUC       *usecase.UpdateTaskUseCase
-	UpdateStatusUC *usecase.UpdateTaskStatusUseCase
-	DeleteUC       *usecase.DeleteTaskUseCase
-	ListUC         *usecase.ListTaskUseCase
+	CreateUC       *usecasetask.CreateTaskUseCase
+	UpdateUC       *usecasetask.UpdateTaskUseCase
+	UpdateStatusUC *usecasetask.UpdateTaskStatusUseCase
+	DeleteUC       *usecasetask.DeleteTaskUseCase
+	ListUC         *usecasetask.ListTaskUseCase
 	Validate       *validator.Validate
 }
 
@@ -44,14 +46,34 @@ func (h *TaskHandler) Create(c *gin.Context) {
 		return
 	}
 
-	out, err := h.CreateUC.Execute(usecase.CreateTaskInput{
+	out, err := h.CreateUC.Execute(usecasetask.CreateTaskInput{
 		Title:       req.Title,
 		Description: req.Description,
 		Priority:    valueobject.Priority(req.Priority),
+		UserID:      req.UserID,
 	})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		switch {
+		case errors.Is(err, usecase.ErrSearchingUserByID):
+			c.JSON(http.StatusConflict, TaskErrorResponse{
+				Error: usecase.ErrSearchingUserByID.Error(),
+			})
+			return
+		case errors.Is(err, usecase.ErrTaskSaveFailed):
+			c.JSON(http.StatusInternalServerError, TaskErrorResponse{
+				Error: usecase.ErrUnknown.Error(),
+			})
+			return
+		case errors.Is(err, usecase.ErrUnknown):
+			c.JSON(http.StatusInternalServerError, TaskErrorResponse{
+				Error: usecase.ErrUnknown.Error(),
+			})
+		default:
+			c.JSON(http.StatusInternalServerError, TaskErrorResponse{
+				Error: usecase.ErrUnknown.Error(),
+			})
+			return
+		}
 	}
 
 	task := out.Task
@@ -93,7 +115,7 @@ func (h *TaskHandler) Update(c *gin.Context) {
 		return
 	}
 
-	task, err := h.UpdateUC.Execute(usecase.UpdateTaskInput{
+	task, err := h.UpdateUC.Execute(usecasetask.UpdateTaskInput{
 		TaskID:      id,
 		UserID:      "123",
 		Title:       req.Title,
@@ -139,7 +161,7 @@ func (h *TaskHandler) UpdateStatus(c *gin.Context) {
 		return
 	}
 
-	input := usecase.UpdateTaskStatusInput{
+	input := usecasetask.UpdateTaskStatusInput{
 		TaskID: id,
 		Status: valueobject.Status(req.Status),
 		UserID: "123",
@@ -211,7 +233,7 @@ func (h *TaskHandler) List(c *gin.Context) {
 func (h *TaskHandler) Delete(c *gin.Context) {
 	id := c.Param("id")
 
-	_, err := h.DeleteUC.Execute(usecase.DeleteTaskInput{TaskID: id})
+	_, err := h.DeleteUC.Execute(usecasetask.DeleteTaskInput{TaskID: id})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -249,4 +271,8 @@ type UpdateTaskRequest struct {
 
 type UpdateTaskStatusRequest struct {
 	Status string `json:"status" validate:"required,oneof=new in_progress completed"`
+}
+
+type TaskErrorResponse struct {
+	Error string `json:"error"`
 }

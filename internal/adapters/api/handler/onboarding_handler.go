@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -60,6 +61,7 @@ func (h *OnboardingHandler) Setup(c *gin.Context) {
 			})
 			return
 		default:
+			fmt.Println("error", err)
 			c.JSON(http.StatusInternalServerError, OnboardingErrorResponse{
 				Error: "unexpected error",
 			})

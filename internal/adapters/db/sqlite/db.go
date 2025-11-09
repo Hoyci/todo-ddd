@@ -7,6 +7,12 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+type SQLExecutor interface {
+	Exec(query string, args ...interface{}) (sql.Result, error)
+	QueryRow(query string, args ...interface{}) *sql.Row
+	Query(query string, args ...interface{}) (*sql.Rows, error)
+}
+
 func InitDB() (*sql.DB, error) {
 	db, err := sql.Open("sqlite", "./data/app.db")
 	if err != nil {
