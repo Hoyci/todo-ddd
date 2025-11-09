@@ -13,17 +13,11 @@ type SQLiteUserRepository struct {
 	tx *sql.Tx
 }
 
-type SQLExecutor interface {
-	Exec(query string, args ...interface{}) (sql.Result, error)
-	QueryRow(query string, args ...interface{}) *sql.Row
-	Query(query string, args ...interface{}) (*sql.Rows, error)
-}
-
 func NewSQLiteUserRepository(db *sql.DB) *SQLiteUserRepository {
 	return &SQLiteUserRepository{db: db}
 }
 
-func NewSQLiteUserRepositoryWithTx(tx *sql.Tx) *SQLiteUserRepository {
+func (r *SQLiteUserRepository) WithTx(tx *sql.Tx) *SQLiteUserRepository {
 	return &SQLiteUserRepository{tx: tx}
 }
 
