@@ -19,10 +19,15 @@ type Task struct {
 	DeletedAt   *time.Time
 }
 
-func NewTask(title, description, userID string, priority valueobject.Priority) *Task {
+func NewTask(title, description, userID string, priority valueobject.Priority) (*Task, error) {
+	titleVO, err := valueobject.NewTaskTitle(title)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Task{
 		ID:          uuid.New().String(),
-		Title:       title,
+		Title:       titleVO.String(),
 		Description: description,
 		Priority:    priority,
 		Status:      valueobject.StatusNew,
@@ -30,7 +35,7 @@ func NewTask(title, description, userID string, priority valueobject.Priority) *
 		CreatedAt:   time.Now(),
 		UpdatedAt:   nil,
 		DeletedAt:   nil,
-	}
+	}, nil
 }
 
 func (t *Task) setStatus(status valueobject.Status) {

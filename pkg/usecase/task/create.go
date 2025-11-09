@@ -57,7 +57,10 @@ func (uc *CreateTaskUseCase) Execute(input CreateTaskInput) (*CreateTaskOutput, 
 			return usecase.ErrUserNotFoundOrDeleted
 		}
 
-		task := domainTask.NewTask(input.Title, input.Description, user.ID, input.Priority)
+		task, err := domainTask.NewTask(input.Title, input.Description, user.ID, input.Priority)
+		if err != nil {
+			return err
+		}
 		if err := txTaskRepo.Save(task); err != nil {
 			slog.Error("error trying to save task", "err", err)
 			return usecase.ErrTaskSaveFailed

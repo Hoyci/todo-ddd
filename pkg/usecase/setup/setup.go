@@ -56,17 +56,23 @@ func (uc *SetupOnboardingUseCase) Execute(input SetupOnboardingInput) error {
 			return usecase.ErrUserAlreadyExists
 		}
 
-		user := domainUser.NewUser(input.Name, input.Email)
+		user, err := domainUser.NewUser(input.Name, input.Email)
+		if err != nil {
+			return err
+		}
 		if err = txUserRepo.Save(*user); err != nil {
 			return usecase.ErrUserSaveFailed
 		}
 
-		task := domainTask.NewTask(
+		task, err := domainTask.NewTask(
 			"Tarefa de boas-vindas",
 			"Essa é uma tarefa criada automaticamente",
 			user.ID,
 			1,
 		)
+		if err != nil {
+			return err
+		}
 		if err = txTaskRepo.Save(task); err != nil {
 			return usecase.ErrTaskSaveFailed
 		}

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/hoyci/todo-ddd/pkg/domain/valueobject"
 )
 
 type User struct {
@@ -15,15 +16,20 @@ type User struct {
 	DeletedAt *time.Time
 }
 
-func NewUser(name, email string) *User {
+func NewUser(name, email string) (*User, error) {
+	emailVO, err := valueobject.NewEmail(email)
+	if err != nil {
+		return nil, err
+	}
+
 	return &User{
 		ID:        uuid.New().String(),
 		Name:      name,
-		Email:     email,
+		Email:     emailVO.String(),
 		CreatedAt: time.Now(),
 		UpdatedAt: nil,
 		DeletedAt: nil,
-	}
+	}, nil
 }
 
 func (t *User) Delete() {

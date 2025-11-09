@@ -20,7 +20,10 @@ type CreateUserUseCase struct {
 }
 
 func (uc *CreateUserUseCase) Execute(input CreateUserInput) (*CreateUserOutput, error) {
-	user := domain.NewUser(input.Name, input.Email)
+	user, err := domain.NewUser(input.Name, input.Email)
+	if err != nil {
+		return nil, err
+	}
 
 	if err := uc.UserRepo.Save(*user); err != nil {
 		slog.Error("error saving user", "email", input.Email)

@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/hoyci/todo-ddd/pkg/domain/valueobject"
 	"github.com/hoyci/todo-ddd/pkg/usecase"
 	usecasesetup "github.com/hoyci/todo-ddd/pkg/usecase/setup"
 )
@@ -60,6 +61,12 @@ func (h *OnboardingHandler) Setup(c *gin.Context) {
 				Error: "user not found",
 			})
 			return
+		case errors.Is(err, valueobject.ErrInvalidEmail) ||
+			errors.Is(err, valueobject.ErrEmptyTitle) ||
+			errors.Is(err, valueobject.ErrTitleTooLong):
+			c.JSON(http.StatusBadRequest, OnboardingErrorResponse{
+				Error: err.Error(),
+			})
 		default:
 			fmt.Println("error", err)
 			c.JSON(http.StatusInternalServerError, OnboardingErrorResponse{
