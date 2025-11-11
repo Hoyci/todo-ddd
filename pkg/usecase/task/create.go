@@ -4,13 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
-	"log/slog"
 
-	"github.com/hoyci/todo-ddd/internal/adapters/db/sqlite"
 	"github.com/hoyci/todo-ddd/pkg/domain"
 	domainTask "github.com/hoyci/todo-ddd/pkg/domain/task"
-	domainUser "github.com/hoyci/todo-ddd/pkg/domain/user"
 
 	"github.com/hoyci/todo-ddd/pkg/domain/valueobject"
 	"github.com/hoyci/todo-ddd/pkg/usecase"
@@ -28,32 +24,24 @@ type CreateTaskOutput struct {
 }
 
 type CreateTaskUseCase struct {
-	TxManager domain.TxManager
-	UserRepo  domainUser.UserRepository
-	TaskRepo  domainTask.TaskRepository
-}
-
-func NewCreateTaskUseCase(txManager domain.TxManager, userRepo domainUser.UserRepository, taskRepo domainTask.TaskRepository) *CreateTaskUseCase {
-	return &CreateTaskUseCase{
-		TxManager: txManager,
-		UserRepo:  userRepo,
-		TaskRepo:  taskRepo,
-	}
+	UoW domain.UnitOfWork
 }
 
 func (uc *CreateTaskUseCase) Execute(input CreateTaskInput) (*CreateTaskOutput, error) {
 	var output *CreateTaskOutput
-	err := uc.TxManager.Do(context.Background(), func(tx domain.Tx) error {
-		sqliteTx, ok := tx.(*sqlite.SQLiteTx)
-		if !ok {
-			return fmt.Errorf("unexpected tx type: %T", tx)
+	err := uc.UoW.Execute(context.Background(), func(work domain.Work) error {
+		userRepo := work.UserRepo()
+		taskRepo := work.TaskRepo()
+
+		user, err := userRepo.FindByID(input.UserID)
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return usecase.ErrUserNotFoundOrDeleted
+			}
+			return err
 		}
 
-		txUserRepo := uc.UserRepo.(*sqlite.SQLiteUserRepository).WithTx(sqliteTx.Tx())
-		txTaskRepo := uc.TaskRepo.(*sqlite.SQLiteTaskRepository).WithTx(sqliteTx.Tx())
-
-		user, err := txUserRepo.FindByID(input.UserID)
-		if errors.Is(err, sql.ErrNoRows) || user.DeletedAt != nil {
+		if user.DeletedAt != nil {
 			return usecase.ErrUserNotFoundOrDeleted
 		}
 
@@ -61,8 +49,8 @@ func (uc *CreateTaskUseCase) Execute(input CreateTaskInput) (*CreateTaskOutput, 
 		if err != nil {
 			return err
 		}
-		if err := txTaskRepo.Save(task); err != nil {
-			slog.Error("error trying to save task", "err", err)
+
+		if err := taskRepo.Save(task); err != nil {
 			return usecase.ErrTaskSaveFailed
 		}
 

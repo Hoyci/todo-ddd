@@ -19,11 +19,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	txManager := sqlite.NewSQLiteTxManager(db)
 	taskRepo := sqlite.NewSQLiteTaskRepository(db)
 	userRepo := sqlite.NewSQLiteUserRepository(db)
+	unitOfWork := sqlite.NewSQLiteUnitOfWork(db)
 
-	createTaskUC := usecasetask.NewCreateTaskUseCase(txManager, userRepo, taskRepo)
+	createTaskUC := &usecasetask.CreateTaskUseCase{UoW: unitOfWork}
 	listUC := &usecasetask.ListTaskUseCase{TaskRepo: taskRepo}
 	updateUC := &usecasetask.UpdateTaskUseCase{TaskRepo: taskRepo}
 	updateStatusUC := &usecasetask.UpdateTaskStatusUseCase{TaskRepo: taskRepo}
@@ -34,7 +34,7 @@ func main() {
 	deleteUserUC := &usecaseuser.DeleteUserUseCase{UserRepo: userRepo}
 	findUserUC := &usecaseuser.FindUserUseCase{UserRepo: userRepo}
 
-	setupUC := &usecasesetup.SetupOnboardingUseCase{TxManager: txManager, UserRepo: userRepo, TaskRepo: taskRepo}
+	setupUC := &usecasesetup.SetupOnboardingUseCase{UoW: unitOfWork}
 
 	validate := validator.New()
 
